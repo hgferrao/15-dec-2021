@@ -1,0 +1,23 @@
+trigger outOfZip on Account (after insert,after update) { 
+    // Storing Account id
+    Set<Id> accId=new Set<Id>();
+    for(Account acc:Trigger.new){
+        accId.add(acc.Id);
+    }
+    
+    // Finding related contacts id of an Account.
+    List<Contact> relContacts=[SELECT Id,AccountId,MailingPostalCode FROM Contact WHERE AccountId in:accId];
+    
+    // To Update the Account Out_of_Zip checkbox
+    List<Account> outOfZipUpdate=new List<Account>();
+    for(Account a:Trigger.New){
+        for(Contact c:relContacts){
+            if(c.MailingPostalCode==a.BillingPostalCode){ 
+                a.Out_of_zip__c=true;      
+            	outOfZipUpdate.add(a);
+                }
+        }
+    }
+    update outOfZipUpdate;
+   
+}
